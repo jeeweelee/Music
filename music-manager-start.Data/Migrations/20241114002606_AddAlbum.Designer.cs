@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using music_manager_starter.Data;
 
@@ -10,9 +11,11 @@ using music_manager_starter.Data;
 namespace music_manager_starter.Data.Migrations
 {
     [DbContext(typeof(DataDbContext))]
-    partial class DataDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241114002606_AddAlbum")]
+    partial class AddAlbum
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
@@ -72,75 +75,6 @@ namespace music_manager_starter.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("music_manager_starter.Data.Models.Playlist", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Playlists");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("5f2a1b29-93d2-4f89-b52d-77a507314b8e"),
-                            Name = "Testing1"
-                        },
-                        new
-                        {
-                            Id = new Guid("7a4b3f1e-6cbb-4a93-8a39-31cba9d2dbf2"),
-                            Name = "Testing2"
-                        },
-                        new
-                        {
-                            Id = new Guid("c0439fbb-c5ad-4dcd-aa84-b5468634459e"),
-                            Name = "Testing3"
-                        });
-                });
-
-            modelBuilder.Entity("music_manager_starter.Data.Models.PlaylistSong", b =>
-                {
-                    b.Property<Guid>("PlaylistId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("SongId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("PlaylistId", "SongId");
-
-                    b.HasIndex("SongId");
-
-                    b.ToTable("PlaylistSong");
-
-                    b.HasData(
-                        new
-                        {
-                            PlaylistId = new Guid("5f2a1b29-93d2-4f89-b52d-77a507314b8e"),
-                            SongId = new Guid("6f47c84f-4a7d-4e83-8b8f-1829f0eafca3")
-                        },
-                        new
-                        {
-                            PlaylistId = new Guid("7a4b3f1e-6cbb-4a93-8a39-31cba9d2dbf2"),
-                            SongId = new Guid("2a76a0b1-b3e1-4ff0-9aa5-5f5e4c81bc45")
-                        },
-                        new
-                        {
-                            PlaylistId = new Guid("c0439fbb-c5ad-4dcd-aa84-b5468634459e"),
-                            SongId = new Guid("fa38a0ed-4f00-48e2-b9c5-5d68f9c0ef41")
-                        },
-                        new
-                        {
-                            PlaylistId = new Guid("7a4b3f1e-6cbb-4a93-8a39-31cba9d2dbf2"),
-                            SongId = new Guid("fa38a0ed-4f00-48e2-b9c5-5d68f9c0ef41")
-                        });
-                });
-
             modelBuilder.Entity("music_manager_starter.Data.Models.Song", b =>
                 {
                     b.Property<Guid>("Id")
@@ -156,9 +90,6 @@ namespace music_manager_starter.Data.Migrations
 
                     b.Property<string>("Genre")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("ReleaseDate")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
@@ -230,25 +161,6 @@ namespace music_manager_starter.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("music_manager_starter.Data.Models.PlaylistSong", b =>
-                {
-                    b.HasOne("music_manager_starter.Data.Models.Playlist", "Playlist")
-                        .WithMany("PlaylistSongs")
-                        .HasForeignKey("PlaylistId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("music_manager_starter.Data.Models.Song", "Song")
-                        .WithMany("PlaylistSongs")
-                        .HasForeignKey("SongId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Playlist");
-
-                    b.Navigation("Song");
-                });
-
             modelBuilder.Entity("music_manager_starter.Data.Models.Song", b =>
                 {
                     b.HasOne("music_manager_starter.Data.Models.Album", "Album")
@@ -263,16 +175,6 @@ namespace music_manager_starter.Data.Migrations
             modelBuilder.Entity("music_manager_starter.Data.Models.Album", b =>
                 {
                     b.Navigation("Songs");
-                });
-
-            modelBuilder.Entity("music_manager_starter.Data.Models.Playlist", b =>
-                {
-                    b.Navigation("PlaylistSongs");
-                });
-
-            modelBuilder.Entity("music_manager_starter.Data.Models.Song", b =>
-                {
-                    b.Navigation("PlaylistSongs");
                 });
 #pragma warning restore 612, 618
         }
