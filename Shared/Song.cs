@@ -13,8 +13,10 @@ namespace music_manager_starter.Shared
         public string Artist { get; set; }
         public string Genre { get; set; }
         public DateTime? ReleaseDate { get; set; }
-        public Guid AlbumId { get; set; }
-        public Album Album { get; set; }
-        public ICollection<PlaylistSong> PlaylistSongs { get; set; } 
+        public Guid? AlbumId { get; set; }
+        public Album? Album { get; set; }
+        public ICollection<PlaylistSong> PlaylistSongs { get; set; } = new List<PlaylistSong>();
+        public ICollection<SongRating> Ratings { get; set; } = new List<SongRating>();
+        public double AverageRating => Ratings.Any() ? Ratings.Average(r => r.Rating) : 0;
     }
 }

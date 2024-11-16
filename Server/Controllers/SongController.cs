@@ -17,26 +17,36 @@ namespace music_manager_starter.Server.Controllers
             _context = context;
         }
 
-  
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Song>>> GetSongs()
         {
             return await _context.Songs.ToListAsync();
         }
 
-        [HttpPost]
-        public async Task<ActionResult<Song>> PostSong(Song song)
-        {
-            if (song == null)
-            {
-                return BadRequest("Song cannot be null.");
-            }
+[HttpPost]
+public async Task<IActionResult> CreateSong(Song song)
+{
+    _context.Songs.Add(song);
+    await _context.SaveChangesAsync();
 
+    var createdSong = await _context.Songs
+        .Include(s => s.Album)
+        .FirstOrDefaultAsync(s => s.Id == song.Id);
 
-            _context.Songs.Add(song);
-            await _context.SaveChangesAsync();
+    return CreatedAtAction(nameof(GetSongs), new { id = song.Id }, createdSong);
+}
+[HttpGet("{id}")]
+public async Task<IActionResult> GetSongById(Guid id)
+{
+    var song = await _context.Songs
+        .FirstOrDefaultAsync(s => s.Id == id);
 
-            return Ok();
-        }
+    if (song == null)
+    {
+        return NotFound();
+    }
+
+    return Ok(song);
+}
     }
 }

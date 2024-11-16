@@ -13,6 +13,8 @@ namespace music_manager_starter.Data
         public DbSet<Playlist> Playlists { get; set; }
         public DbSet<PlaylistSong> PlaylistSong { get; set; }
 
+        public DbSet<SongRating> SongRatings { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {   
                 modelBuilder.Entity<PlaylistSong>()
@@ -28,7 +30,14 @@ namespace music_manager_starter.Data
                 modelBuilder.Entity<PlaylistSong>()
                 .HasOne(ps => ps.Song)
                 .WithMany(s => s.PlaylistSongs)
-                .HasForeignKey(ps => ps.SongId);            
+                .HasForeignKey(ps => ps.SongId); 
+
+                modelBuilder.Entity<SongRating>()
+                .HasOne(sr => sr.Song)
+                .WithMany(s => s.Ratings)
+                .HasForeignKey(sr => sr.SongId)
+                .OnDelete(DeleteBehavior.Cascade);       
+                    
             // Seed Album data
             modelBuilder.Entity<Album>().HasData(
                 new Album { Id = Guid.Parse("a1a1a1a1-1111-1111-1111-111111111111"), Name = "Spiritbox", CoverImage = null },
@@ -60,6 +69,10 @@ namespace music_manager_starter.Data
                 new PlaylistSong { PlaylistId = Guid.Parse("7a4b3f1e-6cbb-4a93-8a39-31cba9d2dbf2"), SongId = Guid.Parse("2a76a0b1-b3e1-4ff0-9aa5-5f5e4c81bc45") }, 
                 new PlaylistSong { PlaylistId = Guid.Parse("c0439fbb-c5ad-4dcd-aa84-b5468634459e"), SongId = Guid.Parse("fa38a0ed-4f00-48e2-b9c5-5d68f9c0ef41") },
                 new PlaylistSong { PlaylistId = Guid.Parse("7a4b3f1e-6cbb-4a93-8a39-31cba9d2dbf2"), SongId = Guid.Parse("fa38a0ed-4f00-48e2-b9c5-5d68f9c0ef41") }  
+            );
+            modelBuilder.Entity<SongRating>().HasData(
+                new SongRating { Id = Guid.Parse("8b7ff8ea-e16c-4ff6-8fdb-b8b0f4437f8e"), SongId = Guid.Parse("6f47c84f-4a7d-4e83-8b8f-1829f0eafca3"), Rating = 4 },
+                new SongRating { Id = Guid.Parse("2a0b9f42-3997-41e7-9a35-8363fa201606"), SongId = Guid.Parse("6f47c84f-4a7d-4e83-8b8f-1829f0eafca3"), Rating = 5 }
             );
 
             modelBuilder.Entity<Song>()
