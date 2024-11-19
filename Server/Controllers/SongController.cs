@@ -23,30 +23,30 @@ namespace music_manager_starter.Server.Controllers
             return await _context.Songs.ToListAsync();
         }
 
-[HttpPost]
-public async Task<IActionResult> CreateSong(Song song)
-{
-    _context.Songs.Add(song);
-    await _context.SaveChangesAsync();
+        [HttpPost]
+        public async Task<IActionResult> CreateSong(Song song)
+        {
+            _context.Songs.Add(song);
+            await _context.SaveChangesAsync();
 
-    var createdSong = await _context.Songs
-        .Include(s => s.Album)
-        .FirstOrDefaultAsync(s => s.Id == song.Id);
+            var createdSong = await _context.Songs
+            .Include(s => s.Album)
+            .FirstOrDefaultAsync(s => s.Id == song.Id);
 
-    return CreatedAtAction(nameof(GetSongs), new { id = song.Id }, createdSong);
-}
-[HttpGet("{id}")]
-public async Task<IActionResult> GetSongById(Guid id)
-{
-    var song = await _context.Songs
-        .FirstOrDefaultAsync(s => s.Id == id);
+        return CreatedAtAction(nameof(GetSongs), new { id = song.Id }, createdSong);
+        }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetSongById(Guid id)
+        {
+            var song = await _context.Songs
+            .FirstOrDefaultAsync(s => s.Id == id);
 
-    if (song == null)
-    {
-        return NotFound();
-    }
+        if (song == null)
+        {
+            return NotFound();
+        }
 
-    return Ok(song);
-}
+        return Ok(song);
+        }
     }
 }

@@ -10,7 +10,7 @@ namespace music_manager_starter.Data.Models
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public byte[]? CoverImage { get; set; } // Store the album cover as a URL
+        public byte[]? CoverImage { get; set; } 
         public ICollection<Song> Songs { get; set; } = new List<Song>();
     }
 }
