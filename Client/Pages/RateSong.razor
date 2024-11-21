@@ -1,0 +1,114 @@
+@page "/song/{id:guid}/rate"
+@using music_manager_starter.Shared
+@using music_manager_starter.Shared.Response
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+@code {
+    [Parameter]
+    public Guid id { get; set; }
+    private int selectedRating = 1; 
+    private Song? song;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {   
+            song = await Http.GetFromJsonAsync<Song>($"api/songs/album/{id}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading song details: {ex.Message}");
+        }
+    }
+
+    private async Task SubmitRating()
+    {
+        try
+        {
+            var ratingResponse = await Http.PostAsJsonAsync($"api/songrating/{id}", new { Rating = selectedRating });
+
+            if (ratingResponse.IsSuccessStatusCode)
+            {   
+                Console.WriteLine("Sucessful in submitting song rating.");
+                Navigation.NavigateTo($"/song/{id}");
+            }
+            else
+            {
+                Console.WriteLine("Could not submit rating.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"There was an error submiting rating: {ex.Message}");
+        }
+    }
+}
+
+<div class="p-0 min-h-screen bg-pattern flex flex-col items-center justify-center">
+    @if (song != null)
+    {
+        <div class="glass p-8 border border-gray-300 rounded-lg text-white">
+            <h2 class="text-3xl font-bold mb-4 text-center">@song.Title</h2>
+            <p class="text-xl text-center">Artist: <span class="font-light">@song.Artist</span></p>
+            <p class="text-md text-center">Album: <span class="font-light">@song.Album?.Name</span></p>
+
+            <div class="text-center">
+                <label for="rating" class="block text-lg font-light">Rate this song (1-5):</label>
+                <select id="rating" class="rating-option" @bind="selectedRating">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <option class = "rating-option" value="@i">@i</option>
+                    }
+                </select>
+            </div>
+
+            <button class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    @onclick="SubmitRating">
+                Submit Rating
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="text-center text-gray-400">No details on this song</div>
+    }
+</div>
+
+<style>
+    .rating-option{
+        color:black;
+    }
+
+    .bg-pattern {
+        background: linear-gradient(rgba(31, 41, 55, 0.7), rgba(31, 41, 55, 0.7)), url('dalle.webp');
+        background-size: cover;
+        background-position: center;
+        font-family: 'Rajdhani', sans-serif;
+    }
+
+    .glass {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px); 
+        border-radius: 10px; 
+        position: relative; 
+        overflow: hidden; 
+    }
+
+    .glass:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        pointer-events: none; 
+    }
+
+    button:hover {
+        transform: scale(1.05);
+        transition: transform 0.2s ease-in-out;
+    }
+</style>

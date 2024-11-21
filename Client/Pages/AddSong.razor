@@ -1,6 +1,7 @@
 ﻿@page "/AddSong"
 @inject HttpClient Http
 @using music_manager_starter.Shared
+@inject NavigationManager Navigation
 
 <div class="p-6">
     <h2 class="text-xl font-semibold text-white">Add New Song</h2>
@@ -47,15 +48,15 @@
 
 @code {
     private Song newSong = new Song();
-    private string message;
     private List<Album> albums = new List<Album>();
+    
 
     protected override async Task OnInitializedAsync()
     {
         albums = await Http.GetFromJsonAsync<List<Album>>("api/album");
         if (albums == null || !albums.Any())
         {
-            message = "No albums found.";
+            Console.WriteLine("No albums found.");
         }
     }
 
@@ -64,15 +65,11 @@ private async Task HandleValidSubmit()
     
 var response = await Http.PostAsJsonAsync("api/songs", newSong);
 if (response.IsSuccessStatusCode)
-{
-    message = "Song added successfully!";
+{   
+    
+    Navigation.NavigateTo("/");  
 }
-else
-{
-    Console.WriteLine($"Error adding song: {response.StatusCode}");
-    message = "Song added successfully!";
-}
-
+    Navigation.NavigateTo("/");  
 
     }
 }

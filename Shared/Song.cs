@@ -17,6 +17,6 @@ namespace music_manager_starter.Shared
         public Album? Album { get; set; }
         public ICollection<PlaylistSong> PlaylistSongs { get; set; } = new List<PlaylistSong>();
         public ICollection<SongRating> Ratings { get; set; } = new List<SongRating>();
-        public double AverageRating => Ratings.Any() ? Ratings.Average(r => r.Rating) : 0;
+        
     }
 }

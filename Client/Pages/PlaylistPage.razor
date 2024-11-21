@@ -1,0 +1,102 @@
+@page "/playlists"
+@using music_manager_starter.Shared
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+@code {
+    private List<Playlist> playlists;
+
+    protected override async Task OnInitializedAsync()
+    {
+        playlists = await Http.GetFromJsonAsync<List<Playlist>>("api/playlist");
+    }
+
+    private void NavigateToDetails(Guid playlistId)
+    {
+        Navigation.NavigateTo($"/playlists/{playlistId}");
+    }
+
+    private void NavigateToAddPlaylist()
+    {
+        Navigation.NavigateTo("/create-playlist");
+    }
+
+    private void NavigateToAddToPlaylist()
+    {
+        Navigation.NavigateTo("/add-to-playlist");
+    }
+
+    private void NavigateToEditPlaylist(Guid playlistId)
+    {
+        Navigation.NavigateTo($"/edit/{playlistId}");
+    }
+}
+
+<h2 class="text-3xl font-bold text-white mb-8 text-center">Playlist Library</h2>
+<div class="p-0 min-h-screen bg-pattern flex flex-col items-center justify-center">
+    <div class="flex justify-between items-center mb-8 w-full max-w-5xl">
+        <div>
+            <button class="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded mr-4"
+                    @onclick="NavigateToAddPlaylist">
+                Create New Playlist
+            </button>
+            <button class="py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded"
+                    @onclick="NavigateToAddToPlaylist">
+                Add Song to Playlist
+            </button>
+        </div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 w-full max-w-5xl">
+        @if (playlists != null && playlists.Count > 0)
+        {
+            @foreach (var playlist in playlists)
+            {
+                <div class="glass p-6 border border-gray-300 rounded-lg text-white transition-transform transform hover:scale-105 hover:shadow-xl cursor-pointer">
+                    <h3 class="text-xl font-semibold mb-2" @onclick="() => NavigateToDetails(playlist.Id)">@playlist.Name</h3>
+                    
+                    <!-- View Songs Link -->
+                    <a href="/playlists/@playlist.Id" class="text-blue-500 text-lg mt-2 block hover:text-blue-700">View Songs</a>
+
+                    <!-- Edit Playlist Button -->
+                    <button class="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded mt-4"
+                            @onclick="() => NavigateToEditPlaylist(playlist.Id)">
+                        Edit Playlist
+                    </button>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-span-1 text-center text-gray-400">No playlists found.</div>
+        }
+    </div>
+</div>
+
+<style>
+    .bg-pattern {
+        background: linear-gradient(rgba(31, 41, 55, 0.7), rgba(31, 41, 55, 0.7)), url("dalle.webp");
+        background-size: cover;
+        background-position: center;
+        font-family: 'Rajdhani', sans-serif;
+    }
+
+    .glass {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px); 
+        border-radius: 10px; 
+        position: relative; 
+        overflow: hidden; 
+    }
+
+    .glass:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        pointer-events: none; 
+    }
+</style>

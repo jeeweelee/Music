@@ -17,6 +17,7 @@ namespace music_manager_starter.Server.Controllers
         {
             _context = context;
         }
+
         [HttpPost("add")] // Add a song to a playlist
         public async Task<IActionResult> AddSongToPlaylist([FromBody] JsonElement data)
         {
@@ -28,21 +29,21 @@ namespace music_manager_starter.Server.Controllers
                 var playlist = await _context.Playlists.FindAsync(playlistId);
                 if (playlist == null)
                 {
-                    return NotFound(new { Message = "Playlist not found." });
+                    return NotFound("Playlist not found.");
                 }
 
                 var song = await _context.Songs.FindAsync(songId);
                 if (song == null)
                 {
-                    return NotFound(new { Message = "Song not found." });
+                    return NotFound("Song not found.");
                 }
 
-                // if song already exist then do this
+                // If song already exist then do this
                 var existingEntry = await _context.PlaylistSong
                 .FirstOrDefaultAsync(ps => ps.PlaylistId == playlistId && ps.SongId == songId);
                 if (existingEntry != null)
                 {
-                    return Conflict(new { Message = "Song is already in the playlist." });
+                    return Conflict("Song is already in the playlist.");
                 }
 
                 var playlistSong = new PlaylistSong
@@ -54,14 +55,13 @@ namespace music_manager_starter.Server.Controllers
                 _context.PlaylistSong.Add(playlistSong);
                 await _context.SaveChangesAsync();
 
-                return Ok(new { Message = "Song added to playlist successfully." });
+                return Ok("Song added to playlist successfully into playlist." );
             }
             catch (Exception ex)
             {
                 return BadRequest(new { Message = "Invalid request data.", Error = ex.Message });
             }
         }
-
 
         [HttpDelete("{playlistId}/{songId}")]   //Delete a song from a playlist
         public async Task<IActionResult> DeleteSongFromPlaylist(Guid playlistId, Guid songId)
@@ -71,7 +71,7 @@ namespace music_manager_starter.Server.Controllers
 
             if (playlistSong == null)
             {
-                return NotFound(new { Message = "Song not found in the specified playlist." });
+                return NotFound("Song not found in the specified playlist.");
             }
 
             _context.PlaylistSong.Remove(playlistSong);
@@ -79,6 +79,29 @@ namespace music_manager_starter.Server.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpGet("{playlistId}")] // Get song in playlist with data
+        public async Task<IActionResult> GetSongsByPlaylist(Guid playlistId)
+        {
+            var playlist = await _context.Playlists.FindAsync(playlistId);
+            if (playlist == null)
+            {
+                return NotFound(new { Message = "Playlist not found." });
+            }
+
+            var songs = await _context.PlaylistSong
+                .Where(ps => ps.PlaylistId == playlistId)
+                .Include(ps => ps.Song)  
+                .Select(ps => ps.Song)   // Get the song data
+                .ToListAsync();
+
+            if (songs.Count == 0)
+            {
+                return NotFound("No songs found in this playlist.");
+            }
+
+            return Ok(songs);
         }
     }
 }

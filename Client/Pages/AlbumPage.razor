@@ -1,0 +1,95 @@
+@page "/albums"
+@using music_manager_starter.Shared
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+@code {
+    private List<Album> albums = new List<Album>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        albums = await Http.GetFromJsonAsync<List<Album>>("api/album");
+
+    }
+
+    private void NavigateToAddAlbum()
+    {
+        Navigation.NavigateTo("/album/add");
+    }
+
+    private string GetCoverImageBase64(byte[] coverImage)
+    {
+        if (coverImage != null)
+        {
+            return $"data:image/jpeg;base64,{Convert.ToBase64String(coverImage)}";
+        }
+        return string.Empty;
+    }
+}
+
+<div class="p-4 min-h-screen bg-pattern flex flex-col items-center">
+    <h2 class="text-3xl font-bold text-white mb-8 text-center">Album Library</h2>
+    <button class="px-4 py-2 bg-green-600 text-white rounded-md mb-4 hover:bg-green-700"
+            @onclick="NavigateToAddAlbum">
+        Create Album
+    </button>
+
+
+    @if (albums.Count == 0)
+    {
+        <div class="text-center text-gray-400">Loading albums...</div>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach (var album in albums)
+            {
+                <div class="glass p-6 border border-gray-300 rounded-lg text-white transition-transform transform hover:scale-105 hover:shadow-xl cursor-pointer">
+                    <div class="text-center">
+                        <h3 class="text-2xl font-semibold text-blue-600 mt-4">@album.Name</h3>
+
+                        @if (album.CoverImage != null && album.CoverImage.Length > 0)
+                        {
+                            <img src="@GetCoverImageBase64(album.CoverImage)" alt="@album.Name Cover Image" class="w-full h-auto rounded-md mt-4" />
+                        }
+                        else
+                        {
+                            <div class="text-gray-400 mt-4">No cover image available</div>
+                        }
+
+                        <a href="/album/@album.Id" class="text-blue-500 text-lg mt-2 block hover:text-blue-700">View Songs</a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .bg-pattern {
+        background: linear-gradient(rgba(31, 41, 55, 0.7), rgba(31, 41, 55, 0.7)), url('dalle.webp');
+        background-size: cover;
+        background-position: center;
+        font-family: 'Rajdhani', sans-serif;
+    }
+
+    .glass {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px); 
+        border-radius: 10px; 
+        position: relative; 
+        overflow: hidden; 
+    }
+
+    .glass:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        pointer-events: none; 
+    }
+</style>

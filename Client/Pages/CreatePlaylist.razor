@@ -1,0 +1,43 @@
+@page "/create-playlist"
+@using music_manager_starter.Shared
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+@code {
+    private Playlist newPlaylist = new Playlist();
+
+    private async Task HandleSubmit()
+    {   
+        var response = await Http.PostAsJsonAsync("api/playlist", newPlaylist);
+
+        if (response.IsSuccessStatusCode)
+        {   Console.WriteLine("Playlist created sucessfully.");
+            Navigation.NavigateTo("/playlists");
+        }
+        else
+        {
+            Console.WriteLine("Failed to create playlist.");
+        }
+    }
+}
+
+<h2 class="text-3xl font-bold text-white mb-4 text-center">Create a New Playlist</h2>
+
+<div class="p-4 bg-pattern flex justify-center">
+    <form class="glass p-6 w-full max-w-md text-white rounded-lg" @onsubmit="HandleSubmit">
+        <div class="mb-4">
+            <label class="block mb-2 font-semibold" for="playlistName">Playlist Name</label>
+            <input type="text" id="playlistName" class="mt-1 block w-full p-2 border rounded text-black"
+                   @bind="newPlaylist.Name" required />
+        </div>
+
+        <button type="submit"
+                class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded">
+            Create Playlist
+        </button>
+    </form>
+</div>
+
+
+
+

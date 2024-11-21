@@ -48,5 +48,20 @@ namespace music_manager_starter.Server.Controllers
 
         return Ok(song);
         }
+
+        [HttpGet("album/{id}")] //inclusion of album information 
+        public async Task<IActionResult> GetSongDetails(Guid id)
+        {
+            var song = await _context.Songs
+            .Include(s => s.Album) 
+            .FirstOrDefaultAsync(s => s.Id == id);
+
+            if (song == null)
+        {
+            return NotFound(new { Message = "Song not found" });
+        }
+
+        return Ok(song);
+        }
     }
 }

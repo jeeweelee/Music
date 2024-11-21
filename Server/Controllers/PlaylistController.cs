@@ -32,14 +32,14 @@ namespace music_manager_starter.Server.Controllers
 
             return CreatedAtAction(nameof(GetPlaylists), new { id = playlist.Id }, playlist);
         }
-    [HttpPut("{id}")] //Edit a playlist by ID
+        [HttpPut("{id}")] //Edit a playlistName by ID, Editing song in other controller
         public async Task<IActionResult> UpdatePlaylistName(Guid id, [FromBody] Playlist playlist)
         {
             var existingPlaylist = await _context.Playlists.FindAsync(id);
 
             if (existingPlaylist == null)
             {
-                return NotFound(new { Message = $"Playlist with ID {id} not found." });
+                return NotFound($"Playlist with ID {id} not found." );
             }
 
             existingPlaylist.Name = playlist.Name;
@@ -50,12 +50,11 @@ namespace music_manager_starter.Server.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = $"An error occurred while updating the playlist: {ex.Message}" });
+                return StatusCode(500, $"An error occurred, could not update the playlist: {ex.Message}" );
             }
 
-            return Ok(new { Message = $"Playlist name updated to '{existingPlaylist.Name}'." });
+            return Ok($"Playlist Name updated {existingPlaylist.Name}");
         }
-
 
         [HttpDelete("{id}")] //Delete Playlist
         public async Task<IActionResult> DeletePlaylist(Guid id)
@@ -64,32 +63,13 @@ namespace music_manager_starter.Server.Controllers
 
             if (playlist == null)
             {
-                return NotFound(new { Message = $"Playlist with ID {id} not found." });
+                return NotFound($"Playlist with ID {id} not found." );
             }
 
             _context.Playlists.Remove(playlist);
 
             await _context.SaveChangesAsync();
-            return Ok(new { Message = $"Playlist with ID {id} has been deleted." });
+            return Ok($"Playlist with ID {id} has been deleted." );
         }
-
-        [HttpGet("{id}")] //Get Songs in playlist
-        public async Task<ActionResult<IEnumerable<Song>>> GetSongsInPlaylist(Guid id)
-        {
-            var playlist = await _context.Playlists
-            .Include(p => p.PlaylistSongs) 
-            .ThenInclude(ps => ps.Song)    
-            .FirstOrDefaultAsync(p => p.Id == id);
-
-        if (playlist == null)
-        {
-            return NotFound(new { Message = $"Playlist with ID {id} not found." });
-        }
-
-        var songs = playlist.PlaylistSongs.Select(ps => ps.Song).ToList();
-
-        return Ok(songs);
-        }
-
     }
 }

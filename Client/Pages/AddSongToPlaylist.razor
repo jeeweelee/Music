@@ -1,0 +1,102 @@
+@page "/add-to-playlist"
+@using music_manager_starter.Shared
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+@code {
+    private List<Song> songs;
+    private List<Playlist> playlists;
+    private Guid selectedSongId;
+    private Guid selectedPlaylistId;
+    private string message; 
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            songs = await Http.GetFromJsonAsync<List<Song>>("api/songs");
+            playlists = await Http.GetFromJsonAsync<List<Playlist>>("api/playlist");
+        }
+        catch (Exception ex)
+        {
+            message = $"Error loading data: {ex.Message}";
+        }
+    }
+
+    private async Task AddSongToPlaylistHandler()
+    {
+        try
+        {
+            if (selectedSongId == Guid.Empty || selectedPlaylistId == Guid.Empty)
+            {
+                message = "Please select both a song and a playlist.";
+                return;
+            }
+
+            var input = new
+            {
+                playlistId = selectedPlaylistId.ToString(),
+                songId = selectedSongId.ToString()
+            };
+
+            var response = await Http.PostAsJsonAsync("api/playlistsong/add", input);
+
+            if (response.IsSuccessStatusCode)
+            {
+                message = "Song added to playlist successfully.";
+            }
+            else
+            {
+                var error = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+                message = error?["Message"] ?? "Failed to add song to playlist.";
+            }
+        }
+        catch (Exception ex)
+        {
+            message = "Error: Can't add same song into the same playlist";
+        }
+    }
+}
+
+<div class="p-4 bg-gray-100 rounded shadow">
+    <h2 class="text-xl font-bold mb-4">Add Song to Playlist</h2>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class="mb-4 p-2 bg-blue-100 text-blue-800 border border-blue-300 rounded">
+            @message
+        </div>
+    }
+
+    @if (songs != null && playlists != null)
+    {
+        <div>
+            <label for="song" class="block mb-2">Select Song</label>
+            <select id="song" class="mt-1 block w-full p-2 border rounded" @bind="selectedSongId">
+                <option value="">-- Select a Song --</option>
+                @foreach (var song in songs)
+                {
+                    <option value="@song.Id">@song.Title - @song.Artist</option>
+                }
+            </select>
+
+            <label for="playlist" class="block mb-2">Select Playlist</label>
+            <select id="playlist" class="mt-1 block w-full p-2 border rounded" @bind="selectedPlaylistId">
+                <option value="">-- Select a Playlist --</option>
+                @foreach (var playlist in playlists)
+                {
+                    <option value="@playlist.Id">@playlist.Name</option>
+                }
+            </select>
+
+            <button class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" @onclick="AddSongToPlaylistHandler">
+                Add Song to Playlist
+            </button>
+        </div>
+    }
+    else
+    {
+        <p>Loading songs and playlists...</p>
+    }
+</div>

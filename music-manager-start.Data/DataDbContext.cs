@@ -25,20 +25,18 @@ namespace music_manager_starter.Data
                 .HasOne(ps => ps.Playlist)
                 .WithMany(p => p.PlaylistSongs)
                 .HasForeignKey(ps => ps.PlaylistId);
-
     
                 modelBuilder.Entity<PlaylistSong>()
                 .HasOne(ps => ps.Song)
                 .WithMany(s => s.PlaylistSongs)
-                .HasForeignKey(ps => ps.SongId); 
+                .HasForeignKey(ps => ps.SongId);  //many to many relationship
 
                 modelBuilder.Entity<SongRating>()
                 .HasOne(sr => sr.Song)
                 .WithMany(s => s.Ratings)
                 .HasForeignKey(sr => sr.SongId)
-                .OnDelete(DeleteBehavior.Cascade);       
+                .OnDelete(DeleteBehavior.Cascade);       // one to many relationship
                     
-            // Seed Album data
             modelBuilder.Entity<Album>().HasData(
                 new Album { Id = Guid.Parse("a1a1a1a1-1111-1111-1111-111111111111"), Name = "Spiritbox", CoverImage = null },
                 new Album { Id = Guid.Parse("b2b2b2b2-2222-2222-2222-222222222222"), Name = "Canyon", CoverImage = null },
@@ -49,7 +47,6 @@ namespace music_manager_starter.Data
                 new Album { Id = Guid.Parse("a17ca4a7-7c7c-7a7a-7a7a-777777777777"), Name = "Twelve Carat Toothache", CoverImage = null }
             );
 
-            // Seed Song data with AlbumId foreign keys
             modelBuilder.Entity<Song>().HasData(
                 new Song { Id = Guid.Parse("6f47c84f-4a7d-4e83-8b8f-1829f0eafca3"), Title = "Circle With Me", Artist = "Spiritbox", Genre = "Metal", AlbumId = Guid.Parse("a1a1a1a1-1111-1111-1111-111111111111") },
                 new Song { Id = Guid.Parse("2a76a0b1-b3e1-4ff0-9aa5-5f5e4c81bc45"), Title = "Notes on a River Town", Artist = "Pony Bradshaw", Genre = "Folk", AlbumId = Guid.Parse("b2b2b2b2-2222-2222-2222-222222222222") },
@@ -79,7 +76,7 @@ namespace music_manager_starter.Data
                 .HasOne(s => s.Album)
                 .WithMany(a => a.Songs)
                 .HasForeignKey(s => s.AlbumId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Cascade);  //one to many relationship
 
             base.OnModelCreating(modelBuilder);
         }

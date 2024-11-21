@@ -1,0 +1,73 @@
+@page "/edit/{id:guid}"
+@using music_manager_starter.Shared
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+@code {
+    [Parameter] public Guid id { get; set; }  
+    private Playlist playlist = new Playlist(); 
+    private string message;  
+
+
+    protected override async Task OnInitializedAsync()
+    {
+            playlist = await Http.GetFromJsonAsync<Playlist>($"api/playlist/{id}");
+    }
+    private async Task SavePlaylist()
+    {
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"api/playlist/{id}", playlist);
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/playlists");  
+            }
+            else
+            {
+                message = "Failed to save changes. Please try again."; 
+            }
+        }
+        catch (Exception ex)
+        {
+            message = "An error occurred while saving the playlist."; 
+        }
+    }
+}
+
+<h2 class="text-3xl font-bold text-white mb-8 text-center">Edit Playlist</h2>
+
+<div class="p-4 min-h-screen bg-pattern flex flex-col items-center justify-center">
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class="text-red-500 mb-4 text-center">@message</div> 
+    }
+
+    <div class="max-w-2xl w-full">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h3 class="text-2xl font-semibold text-center mb-4">Edit Playlist Name</h3>
+
+            <div class="mb-4">
+                <label for="playlistName" class="block text-lg font-semibold">Playlist Name</label>
+                <input id="playlistName" type="text" class="w-full p-2 mt-2 border border-gray-300 rounded" 
+                       @bind="playlist.Name" placeholder="Enter new playlist name" />
+            </div>
+
+            <div class="flex justify-between">
+                <button class="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded"
+                        @onclick="SavePlaylist">
+                    Save Changes
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-pattern {
+        background: linear-gradient(rgba(31, 41, 55, 0.7), rgba(31, 41, 55, 0.7)), url("dalle.webp");
+        background-size: cover;
+        background-position: center;
+        font-family: 'Rajdhani', sans-serif;
+    }
+</style>

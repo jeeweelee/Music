@@ -1,0 +1,143 @@
+@page "/playlists/{id:guid}"
+@using music_manager_starter.Shared
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+@code {
+    [Parameter] public Guid id { get; set; }
+
+    private List<Song> playlistSongs = new();
+    private string message;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (id == Guid.Empty)
+        {
+            message = "Invalid Playlist ID."; 
+            return;
+        }
+
+        await LoadPlaylistSongs(id);
+    }
+
+    private async Task LoadPlaylistSongs(Guid playlistId)
+    {
+        try
+        {
+            playlistSongs = await Http.GetFromJsonAsync<List<Song>>($"api/playlistsong/{playlistId}");
+
+            if (playlistSongs == null || !playlistSongs.Any())
+            {
+                message = $"No songs found in playlist {playlistId}";
+            }
+            else
+            {
+                message = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching songs: {ex.Message}");
+            playlistSongs = new List<Song>(); 
+        }
+    }
+
+    private async Task DeleteSongFromPlaylist(Guid songId)
+    {
+        if (id == Guid.Empty)
+        {
+            message = "Invalid Playlist ID."; 
+            return;
+        }
+
+        try
+        {
+            var response = await Http.DeleteAsync($"api/playlistsong/{id}/{songId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                message = $"Song {songId} deleted from playlist {id}";
+                // Refresh
+                await LoadPlaylistSongs(id);
+            }
+            else
+            {
+                message = $"Failed to delete song {songId}";
+            }
+        }
+        catch (Exception ex)
+        {
+            message = $"Error deleting song: {ex.Message}";
+        }
+    }
+
+    private async Task DeletePlaylist()
+    {
+        if (id == Guid.Empty)
+        {
+            message = "Invalid Playlist ID.";
+            return;
+        }
+
+        try
+        {
+            var response = await Http.DeleteAsync($"api/playlist/{id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Playlist {id} has been deleted.");
+                
+            }
+            Navigation.NavigateTo("/playlists");  
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting playlist: {ex.Message}");
+        }
+    }
+}
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="text-center text-blue-500 mb-4">@message</div> 
+}
+
+@if (id == Guid.Empty)
+{
+    <p class="text-center text-red-500">@message</p>
+}
+else
+{
+    <!-- Delete Playlist Button, always visible, moved slightly down -->
+    <div class="absolute top-24 right-4">
+        <button class="py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded"
+                @onclick="DeletePlaylist">
+            Delete Playlist
+        </button>
+    </div>
+
+    @if (playlistSongs == null || !playlistSongs.Any())
+    {
+        <p class="text-center text-red-500">No songs found in this playlist.</p>
+    }
+    else
+    {
+        <h2 class="text-3xl font-bold text-white mb-8 text-center">Song Library</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+            @foreach (var song in playlistSongs)
+            {
+                <div class="song-card p-4 border border-gray-300 rounded-lg shadow-lg bg-white">
+                    <div class="text-center">
+                        <h3 class="text-xl font-semibold text-blue-600 mt-4">@song.Title</h3>
+                        <p class="text-gray-500">@song.Artist</p>
+                        <button class="py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded mt-4"
+                                @onclick="() => DeleteSongFromPlaylist(song.Id)">
+                            Delete Song
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}
